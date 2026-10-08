@@ -1,0 +1,524 @@
+7<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indihome - Snack Indomaret</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- HEADER / NAVBAR -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="resetFilter()">
+                <div class="bg-red-600 text-white p-2 rounded-xl">
+                    <i data-lucide="cookie" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">Indihome</span>
+            </div>
+
+            <!-- Search Bar (Desktop) -->
+            <div class="hidden md:flex items-center flex-1 max-w-md mx-8 relative">
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Cari 50+ snack Indomaret..." class="w-full bg-slate-100 border border-slate-200 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white transition text-sm">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5"></i>
+            </div>
+
+            <!-- Cart Toggle Button -->
+            <button onclick="toggleCart()" class="relative p-2 text-slate-600 hover:text-red-600 transition">
+                <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                <span id="cartCountBadge" class="hidden absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">0</span>
+            </button>
+        </div>
+        <!-- Search Bar (Mobile) -->
+        <div class="md:hidden px-4 pb-3">
+            <div class="relative">
+                <input type="text" id="searchInputMobile" oninput="handleSearchMobile()" placeholder="Cari snack Indomaret..." class="w-full bg-slate-100 border border-slate-200 rounded-full py-2 pl-10 pr-4 text-sm">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        <!-- Hero Banner -->
+        <div class="bg-gradient-to-r from-red-600 to-rose-600 rounded-2xl p-6 sm:p-10 text-white mb-8 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="max-w-xl">
+                <span class="bg-white/20 text-xs uppercase tracking-wider px-3 py-1 rounded-full font-semibold mb-3 inline-block">Snack Indomaret Lengkap</span>
+                <h1 class="text-3xl sm:text-4xl font-extrabold mb-2">Pesan Snack Favoritmu di Indihome!</h1>
+                <p class="text-red-100 text-sm sm:text-base">Tersedia 50 jenis cemilan Indomaret pilihan. Pembayaran via M-Banking atau COD langsung antar!</p>
+            </div>
+            <a href="#productGrid" class="bg-white text-red-600 px-6 py-3 rounded-xl font-bold shadow hover:bg-slate-100 transition whitespace-nowrap">Pilih Snack</a>
+        </div>
+
+        <!-- Filter Categories -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-none" id="categoryContainer">
+            <!-- Dynamic categories via JS -->
+        </div>
+
+        <!-- Product Grid -->
+        <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+            <!-- Dynamic products via JS -->
+        </div>
+        
+        <!-- Empty Product View -->
+        <div id="noProducts" class="hidden text-center py-16">
+            <i data-lucide="package-x" class="w-16 h-16 text-slate-300 mx-auto mb-3"></i>
+            <h3 class="text-lg font-semibold text-slate-600">Snack tidak ditemukan</h3>
+            <p class="text-sm text-slate-400">Coba gunakan kata kunci pencarian yang lain.</p>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 text-sm py-8 border-t border-slate-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="font-medium text-slate-300">Indihome &copy; 2026. Hak Cipta Dilindungi.</p>
+            <p class="text-xs mt-1 text-slate-500">Pusat Belanja Snack Indomaret Online - M-Banking & COD (Bayar di Tempat).</p>
+        </div>
+    </footer>
+
+    <!-- CART & CHECKOUT SIDEBAR -->
+    <div id="cartModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden transition-opacity duration-300">
+        <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+            <div class="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+                <!-- Header Sidebar -->
+                <div class="p-4 border-b flex items-center justify-between bg-slate-50">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 text-red-600"></i>
+                        <h2 class="font-bold text-lg text-slate-800">Keranjang Belanja</h2>
+                    </div>
+                    <button onclick="toggleCart()" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <!-- Items List -->
+                <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <!-- Dynamic Cart Items -->
+                </div>
+
+                <!-- Empty Cart State -->
+                <div id="emptyCartView" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center">
+                    <i data-lucide="shopping-cart" class="w-16 h-16 text-slate-300 mb-2"></i>
+                    <p class="text-slate-500 font-medium">Keranjang Anda masih kosong</p>
+                    <button onclick="toggleCart()" class="mt-4 text-red-600 font-semibold hover:underline text-sm">Mulai Pilih Snack &rarr;</button>
+                </div>
+
+                <!-- Checkout Form & Summary -->
+                <div id="checkoutSection" class="border-t p-4 bg-slate-50 space-y-4 max-h-[60vh] overflow-y-auto">
+                    <!-- Total Price -->
+                    <div class="flex justify-between items-center text-lg font-bold">
+                        <span class="text-slate-700">Total Harga:</span>
+                        <span id="cartTotalPrice" class="text-red-600">Rp 0</span>
+                    </div>
+
+                    <hr class="border-slate-200">
+
+                    <!-- Customer Info Form -->
+                    <form id="checkoutForm" onsubmit="processCheckout(event)" class="space-y-3">
+                        <h3 class="font-semibold text-slate-800 text-sm flex items-center gap-1.5">
+                            <i data-lucide="user" class="w-4 h-4 text-red-600"></i> Data Pengiriman
+                        </h3>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Nama Lengkap *</label>
+                            <input type="text" id="custName" required placeholder="Contoh: Budi Santoso" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Nomor WhatsApp / HP *</label>
+                            <input type="tel" id="custPhone" required placeholder="Contoh: 083894944315" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Alamat Lengkap Pengiriman *</label>
+                            <textarea id="custAddress" required rows="2" placeholder="Jl. Mawar No. 12, Kel. Menteng, Jakarta" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"></textarea>
+                        </div>
+
+                        <!-- Payment Method Selection -->
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Metode Pembayaran *</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="border rounded-lg p-2.5 flex items-center gap-2 cursor-pointer hover:border-red-500 transition text-xs has-[:checked]:border-red-600 has-[:checked]:bg-red-50">
+                                    <input type="radio" name="paymentMethod" value="M-Banking" checked class="text-red-600 focus:ring-red-500">
+                                    <div>
+                                        <div class="font-semibold text-slate-800">M-Banking</div>
+                                        <div class="text-[10px] text-slate-500">Transfer Bank</div>
+                                    </div>
+                                </label>
+                                <label class="border rounded-lg p-2.5 flex items-center gap-2 cursor-pointer hover:border-red-500 transition text-xs has-[:checked]:border-red-600 has-[:checked]:bg-red-50">
+                                    <input type="radio" name="paymentMethod" value="COD" class="text-red-600 focus:ring-red-500">
+                                    <div>
+                                        <div class="font-semibold text-slate-800">COD</div>
+                                        <div class="text-[10px] text-slate-500">Bayar di Tempat</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Info Rekening (Tampil jika M-Banking) -->
+                        <div id="mbankingInfo" class="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-900 space-y-1">
+                            <p class="font-semibold">Transfer Rekening Toko Indihome:</p>
+                            <p>BCA: <span class="font-mono font-bold">1234-5678-90</span> a/n Indihome Snack</p>
+                            <p>Mandiri: <span class="font-mono font-bold">0987-6543-21</span> a/n Indihome Snack</p>
+                        </div>
+
+                        <!-- Checkout Button -->
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30">
+                            <i data-lucide="message-circle" class="w-5 h-5"></i>
+                            Kirim Pesanan via WhatsApp
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // NOMOR WHATSAPP PENJUAL INDIHOME
+        const SELLER_PHONE = "6283894944315";
+
+        // ============ 55 DATA PRODUK ============
+        const rawProducts = [
+            { name: "Chitato Sapi Panggang",         variant: "Rasa Sapi Panggang",  weight: "68g",  category: "Asin",  image: "a1.jpg",  rasa: [{ name: "Sapi Panggang", price: "14900" }] },
+            { name: "Chitato Beef Mala",             variant: "Rasa Beef Mala",   weight: "68g",  category: "Asin",  image: "a2.jpg",  rasa: [{ name: "Black Pepper", price: "15000" }] },
+            { name: "Mister Potato Ghost Pepper",       variant: "Ghost Pepper",        weight: "68g",  category: "Pedas", image: "a3.jpg",  rasa: [{ name: "Ghost Pepper", price: "15900" }] },
+            { name: "Piattos Kentang",                  variant: "Kentang 68g",         weight: "68g",  category: "Asin",  image: "a4.jpg",  rasa: [{ name: "Original", price: "9400" }] },
+            { name: "Japota Potato Chips",              variant: "68g",                 weight: "68g",  category: "Asin",  image: "a5.jpg",  rasa: [{ name: "Original", price: "8900" }] },
+            { name: "Oishi Tater Thins",                variant: "100g",                weight: "100g", category: "Asin",  image: "a6.jpg",  rasa: [{ name: "Original", price: "11900" }, { name: "Promo", price: "10900" }] },
+            { name: "Oishi Rasa Udang",                 variant: "Rasa Udang",          weight: "68g",  category: "Asin",  image: "a7.jpg",  rasa: [{ name: "Udang", price: "8500" }] },
+            { name: "Oishi Rasa Keju",                  variant: "Rasa Keju",           weight: "68g",  category: "Asin",  image: "a8.jpg",  rasa: [{ name: "Keju", price: "8500" }] },
+            { name: "Oishi Spon",                       variant: "Snack Spon",          weight: "68g",  category: "Asin",  image: "a9.jpg",  rasa: [{ name: "Original", price: "10000" }] },
+            { name: "Kusuka Keripik Singkong",          variant: "180g",                weight: "180g", category: "Asin",  image: "a10.jpg", rasa: [{ name: "Original", price: "15900" }] },
+            { name: "Qtela",                            variant: "Keripik Kentang",     weight: "60g",  category: "Asin",  image: "a11.jpg", rasa: [{ name: "Original", price: "7500" }] },
+            { name: "Happytos",                         variant: "Tortilla Chips",      weight: "140g", category: "Asin",  image: "a12.jpg", rasa: [{ name: "Original", price: "22000" }] },
+            { name: "Brio Crispy",                      variant: "Keripik",             weight: "68g",  category: "Asin",  image: "a13.jpg", rasa: [{ name: "Original", price: "12000" }] },
+            { name: "Chiki Balls",                      variant: "Snack Balls",         weight: "68g",  category: "Asin",  image: "a14.jpg", rasa: [{ name: "Original", price: "19900" }] },
+            { name: "Smax Ghost Pepper",                variant: "Ghost Pepper",        weight: "68g",  category: "Pedas", image: "a15.jpg", rasa: [{ name: "Ghost Pepper", price: "10000" }] },
+            { name: "Doritos Black Pepper",             variant: "Black Pepper",        weight: "68g",  category: "Asin",  image: "a16.jpg", rasa: [{ name: "Black Pepper", price: "15000" }] },
+            { name: "Taro Snack Legend",                variant: "Snack Legendaris",    weight: "68g",  category: "Asin",  image: "a17.jpg", rasa: [{ name: "Original", price: "5500" }] },
+            { name: "Stik Kentang",                     variant: "Stik Kentang",        weight: "68g",  category: "Asin",  image: "a18.jpg", rasa: [{ name: "Original", price: "10000" }] },
+            { name: "Poppy Pop",                        variant: "Popcorn",             weight: "60g",  category: "Asin",  image: "a19.jpg", rasa: [{ name: "Original", price: "2000" }] },
+            { name: "Oreo Sandwich",                    variant: "105g",                weight: "105g", category: "Manis", image: "a20.jpg", rasa: [{ name: "Original", price: "9900" }] },
+            { name: "Oreo 119g",                        variant: "119g",                weight: "119g", category: "Manis", image: "a21.jpg", rasa: [{ name: "Original", price: "8900" }] },
+            { name: "Oreo Biskuit",                     variant: "Biskuit",             weight: "68g",  category: "Manis", image: "a22.jpg", rasa: [{ name: "Original", price: "10000" }] },
+            { name: "Good Time Cookies Choco Dip",      variant: "Choco Dip",           weight: "68g",  category: "Manis", image: "a23.jpg", rasa: [{ name: "Choco Dip", price: "7900" }] },
+            { name: "Lotte Chocopie 6's",               variant: "6 pcs",               weight: "6 pcs",category: "Manis", image: "a24.jpg", rasa: [{ name: "Original", price: "15900" }] },
+            { name: "Cadbury Dairy Milk 52g",           variant: "52g",                 weight: "52g",  category: "Manis", image: "a25.jpg", rasa: [{ name: "Dairy Milk", price: "13500" }] },
+            { name: "Delfi Cokelat",                    variant: "Cokelat",             weight: "68g",  category: "Manis", image: "a26.jpg", rasa: [{ name: "Original", price: "8500" }] },
+            { name: "Selamat Black Vanilla Wafer",      variant: "Black Vanilla",       weight: "68g",  category: "Manis", image: "a27.jpg", rasa: [{ name: "Black Vanilla", price: "10000" }] },
+            { name: "Kokola Kukis Black Cokelat",       variant: "110g",                weight: "110g", category: "Manis", image: "a28.jpg", rasa: [{ name: "Black Cokelat", price: "4900" }] },
+            { name: "Gery Snack Bantal",                variant: "Snack Bantal",        weight: "68g",  category: "Manis", image: "a29.jpg", rasa: [{ name: "Original", price: "10000" }] },
+            { name: "Monde Original",                   variant: "Biskuit",             weight: "68g",  category: "Manis", image: "a30.jpg", rasa: [{ name: "Original", price: "5500" }] },
+            { name: "Monde Spicy",                      variant: "Spicy",               weight: "68g",  category: "Pedas", image: "a31.jpg", rasa: [{ name: "Spicy", price: "6300" }] },
+            { name: "Nabati Wafer",                     variant: "Wafer",               weight: "68g",  category: "Manis", image: "a32.jpg", rasa: [{ name: "Original", price: "9000" }] },
+            { name: "Tango Wafer",                      variant: "Wafer",               weight: "68g",  category: "Manis", image: "a33.jpg", rasa: [{ name: "Original", price: "8500" }] },
+            { name: "Astor Wafer",                      variant: "Wafer",               weight: "68g",  category: "Manis", image: "a34.jpg", rasa: [{ name: "Original", price: "10000" }] },
+            { name: "Roma Kelapa Cream",                variant: "Kelapa Cream",        weight: "68g",  category: "Manis", image: "a35.jpg", rasa: [{ name: "Kelapa Cream", price: "7500" }] },
+            { name: "Roma Sari Gandum",                 variant: "Sari Gandum",         weight: "68g",  category: "Manis", image: "a36.jpg", rasa: [{ name: "Sari Gandum", price: "8000" }] },
+            { name: "Khong Guan Assorted",              variant: "Assorted",            weight: "68g",  category: "Manis", image: "a37.jpg", rasa: [{ name: "Assorted", price: "12000" }] },
+            { name: "Wafer Roll",                       variant: "Wafer Roll",          weight: "68g",  category: "Manis", image: "a38.jpg", rasa: [{ name: "Original", price: "9500" }] },
+            { name: "Twister Rasa Vanila",              variant: "Vanila",              weight: "68g",  category: "Manis", image: "a39.jpg", rasa: [{ name: "Vanila", price: "9900" }] },
+            { name: "Garuda Kacang Atom Pedas",         variant: "220g",                weight: "220g", category: "Pedas", image: "a40.jpg", rasa: [{ name: "Pedas", price: "19900" }] },
+            { name: "Dua Kelinci Kacang Sangrai",       variant: "180g",                weight: "180g", category: "Asin",  image: "a41.jpg", rasa: [{ name: "Sangrai", price: "18900" }] },
+            { name: "Yupi Gummy Candy 45g",             variant: "45g",                 weight: "45g",  category: "Manis", image: "a42.jpg", rasa: [{ name: "Gummy", price: "4900" }] },
+            { name: "Soes Cokelat",                     variant: "Soes",                weight: "68g",  category: "Manis", image: "a43.jpg", rasa: [{ name: "Cokelat", price: "10000" }] },
+            { name: "Popcorn Caramel",                  variant: "Caramel",             weight: "68g",  category: "Manis", image: "a44.jpg", rasa: [{ name: "Caramel", price: "10200" }] },
+            { name: "Telur Gabus",                      variant: "Telur Gabus",         weight: "68g",  category: "Manis", image: "a45.jpg", rasa: [{ name: "Original", price: "10000" }] },
+            { name: "Indomaret Snack Samosa",          variant: "100g",                weight: "100g", category: "Asin",  image: "a46.jpg", rasa: [{ name: "Original", price: "19800" }] },
+            { name: "Tic Tac Black Licorice",           variant: "Black Licorice",      weight: "68g",  category: "Manis", image: "a47.jpg", rasa: [{ name: "Black Licorice", price: "10000" }] },
+            { name: "Tao Kae Noi Big Roll",             variant: "Big Roll",            weight: "68g",  category: "Asin",  image: "a48.jpg", rasa: [{ name: "Original", price: "12000" }] },
+            { name: "Gery Aneka Snack",                 variant: "Aneka Snack",         weight: "68g",  category: "Asin",  image: "a49.jpg", rasa: [{ name: "Original", price: "11000" }] },
+            { name: "Mie Sedaap Korean Spicy Cup",      variant: "Cup",                 weight: "68g",  category: "Pedas", image: "a50.jpg", rasa: [{ name: "Korean Spicy", price: "10000" }] },
+            { name: "Mie Sedaap Goreng Korean Spicy",   variant: "Goreng",              weight: "68g",  category: "Pedas", image: "a51.jpg", rasa: [{ name: "Korean Spicy", price: "8000" }] },
+            { name: "Chitato Barbeque",                 variant: "Barbeque",            weight: "68g",  category: "Asin",  image: "a52.jpg", rasa: [{ name: "Barbeque", price: "15000" }] },
+            { name: "Lay's Classic",                    variant: "Classic",             weight: "68g",  category: "Asin",  image: "a53.jpg", rasa: [{ name: "Classic", price: "16500" }] },
+            { name: "Pringles Original",                variant: "Original",            weight: "68g",  category: "Asin",  image: "a54.jpg", rasa: [{ name: "Original", price: "18000" }] },
+            { name: "Pocky Strawberry",                 variant: "Strawberry",          weight: "68g",  category: "Manis", image: "a55.jpg", rasa: [{ name: "Strawberry", price: "10000" }] }
+        ];
+
+        // Normalisasi data produk
+        const products = rawProducts.map((p, index) => {
+            const firstPrice = p.rasa && p.rasa.length > 0 ? parseFloat(p.rasa[0].price) : 0;
+            return {
+                id: index + 1,
+                name: p.name,
+                category: p.category,
+                image: p.image,
+                price: firstPrice,
+                rating: (4.5 + (index % 5) * 0.1).toFixed(1)
+            };
+        });
+
+        // GLOBAL STATE
+        let cart = [];
+        let selectedCategory = 'Semua';
+
+        // INITIALIZATION
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCategories();
+            renderProducts(products);
+            setupPaymentToggle();
+            lucide.createIcons();
+        });
+
+        // FORMAT CURRENCY
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
+        }
+
+        // RENDER CATEGORIES
+        function renderCategories() {
+            const categories = ['Semua', ...new Set(products.map(p => p.category))];
+            const container = document.getElementById('categoryContainer');
+            
+            container.innerHTML = categories.map(cat => `
+                <button onclick="filterCategory('${cat}')" 
+                    class="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition duration-200 ${selectedCategory === cat ? 'bg-red-600 text-white shadow-md shadow-red-600/30' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        // FILTER CATEGORY
+        function filterCategory(category) {
+            selectedCategory = category;
+            renderCategories();
+            
+            const filtered = category === 'Semua' 
+                ? products 
+                : products.filter(p => p.category === category);
+                
+            renderProducts(filtered);
+        }
+
+        // RESET FILTER
+        function resetFilter() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchInputMobile').value = '';
+            filterCategory('Semua');
+        }
+
+        // RENDER PRODUCTS
+        function renderProducts(items) {
+            const grid = document.getElementById('productGrid');
+            const noProducts = document.getElementById('noProducts');
+
+            if (items.length === 0) {
+                grid.innerHTML = '';
+                noProducts.classList.remove('hidden');
+                return;
+            }
+
+            noProducts.classList.add('hidden');
+            grid.innerHTML = items.map(product => `
+                <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
+                    <div class="relative overflow-hidden aspect-square bg-slate-100">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                        <span class="absolute top-2 left-2 bg-white/80 backdrop-blur-md text-xs font-bold px-2 py-1 rounded-md text-slate-700 flex items-center gap-1 shadow-sm">
+                            <i data-lucide="star" class="w-3 h-3 text-amber-400 fill-amber-400"></i>
+                            ${product.rating}
+                        </span>
+                    </div>
+                    <div class="p-3 sm:p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-wider font-semibold text-red-500">${product.category}</span>
+                            <h3 class="font-semibold text-slate-800 text-xs sm:text-sm line-clamp-2 mt-0.5 leading-snug" title="${product.name}">${product.name}</h3>
+                        </div>
+                        <div class="mt-3">
+                            <p class="text-sm sm:text-base font-extrabold text-red-600">${formatRupiah(product.price)}</p>
+                            <button onclick="addToCart(${product.id})" class="mt-2 w-full bg-slate-900 hover:bg-red-600 text-white text-xs font-semibold py-2 rounded-xl transition flex items-center justify-center gap-1.5 active:scale-95">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Tambah
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        // SEARCH HANDLERS
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+            renderProducts(filtered);
+        }
+
+        function handleSearchMobile() {
+            const query = document.getElementById('searchInputMobile').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+            renderProducts(filtered);
+        }
+
+        // CART MANAGEMENT
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existing = cart.find(item => item.id === productId);
+
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            updateCartUI();
+        }
+
+        function updateQuantity(productId, delta) {
+            const item = cart.find(i => i.id === productId);
+            if (!item) return;
+
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+
+            updateCartUI();
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(i => i.id !== productId);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartItems = document.getElementById('cartItems');
+            const cartCountBadge = document.getElementById('cartCountBadge');
+            const emptyCartView = document.getElementById('emptyCartView');
+            const checkoutSection = document.getElementById('checkoutSection');
+            const cartTotalPrice = document.getElementById('cartTotalPrice');
+
+            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            // Update Badge
+            if (totalCount > 0) {
+                cartCountBadge.textContent = totalCount;
+                cartCountBadge.classList.remove('hidden');
+            } else {
+                cartCountBadge.classList.add('hidden');
+            }
+
+            // Render Cart Content
+            if (cart.length === 0) {
+                cartItems.innerHTML = '';
+                emptyCartView.classList.remove('hidden');
+                checkoutSection.classList.add('hidden');
+            } else {
+                emptyCartView.classList.add('hidden');
+                checkoutSection.classList.remove('hidden');
+
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="flex items-center gap-3 p-2 border border-slate-100 rounded-xl bg-slate-50">
+                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg bg-white">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-bold text-slate-800 truncate">${item.name}</h4>
+                            <p class="text-xs text-red-600 font-semibold mt-0.5">${formatRupiah(item.price)}</p>
+                            <div class="flex items-center gap-2 mt-2">
+                                <button onclick="updateQuantity(${item.id}, -1)" class="w-5 h-5 bg-white border rounded flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-100">-</button>
+                                <span class="text-xs font-bold text-slate-800">${item.quantity}</span>
+                                <button onclick="updateQuantity(${item.id}, 1)" class="w-5 h-5 bg-white border rounded flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-100">+</button>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            cartTotalPrice.textContent = formatRupiah(totalPrice);
+            lucide.createIcons();
+        }
+
+        // TOGGLE CART SIDEBAR
+        function toggleCart() {
+            const modal = document.getElementById('cartModal');
+            modal.classList.toggle('hidden');
+        }
+
+        // TOGGLE PAYMENT INFO DISPLAY
+        function setupPaymentToggle() {
+            const radios = document.querySelectorAll('input[name="paymentMethod"]');
+            const infoBox = document.getElementById('mbankingInfo');
+
+            radios.forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'M-Banking') {
+                        infoBox.classList.remove('hidden');
+                    } else {
+                        infoBox.classList.add('hidden');
+                    }
+                });
+            });
+        }
+
+        // PROCESS CHECKOUT & SEND TO WHATSAPP
+        function processCheckout(event) {
+            event.preventDefault();
+
+            if (cart.length === 0) return;
+
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const address = document.getElementById('custAddress').value.trim();
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            // Format WhatsApp Message
+            let message = `*PESANAN SNACK BARU - INDIHOME*\n`;
+            message += `-------------------------------------------\n`;
+            message += `*Data Pemesan:*\n`;
+            message += `• *Nama:* ${name}\n`;
+            message += `• *No. HP:* ${phone}\n`;
+            message += `• *Alamat:* ${address}\n`;
+            message += `• *Metode Pembayaran:* ${paymentMethod}\n\n`;
+
+            message += `*Daftar Snack Indomaret:*\n`;
+            cart.forEach((item, index) => {
+                message += `${index + 1}. ${item.name} (${item.quantity}x) - ${formatRupiah(item.price * item.quantity)}\n`;
+            });
+
+            message += `-------------------------------------------\n`;
+            message += `*TOTAL PEMBAYARAN:* *${formatRupiah(totalPrice)}*\n`;
+            message += `-------------------------------------------\n\n`;
+
+            if (paymentMethod === 'M-Banking') {
+                message += `*Instruksi Pembayaran (M-Banking):*\n`;
+                message += `Mohon transfer ke rekening toko Indihome:\n`;
+                message += `• BCA: 1234-5678-90 a/n Indihome Snack\n`;
+                message += `• Mandiri: 0987-6543-21 a/n Indihome Snack\n`;
+                message += `_Kirimkan bukti transfer pada chat ini setelah pembayaran._`;
+            } else {
+                message += `*Instruksi Pembayaran (COD):*\n`;
+                message += `_Siapkan uang pas sejumlah *${formatRupiah(totalPrice)}* saat kurir mengantarkan snack ke alamat Anda._`;
+            }
+
+            // Encode & Redirect to WhatsApp
+            const encodedMessage = encodeURIComponent(message);
+            const waUrl = `https://wa.me/${SELLER_PHONE}?text=${encodedMessage}`;
+
+            window.open(waUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
